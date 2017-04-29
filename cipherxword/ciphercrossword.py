@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import numpy as np
 
 
 class CipherCrossword(object):
@@ -18,15 +19,26 @@ class CipherCrossword(object):
         self.image_grayscale = cv2.cvtColor(self.image_original, cv2.COLOR_BGR2GRAY)
     
     
-    def isolate_puzzle(self, visualize=False):
-        """Identifies the puzzle from the image, assuming it is bounded by
+    def detect_puzzle(self, visualize=False):
+        """Detects the puzzle from the image, assuming it is bounded by
         the largest contour by area.
         
         Args:
             visualize: If True, returns the image with the identified puzzle
                 marked. (optional, default: False)
         """
-        raise NotImplementedError()
+        # Threshold the image and find the largest contour by area
+        self.image_thresholded = cv2.adaptiveThreshold(self.image_grayscale,
+            255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 15)
+        image = np.copy(self.image_thresholded)
+        _, contours, _ = cv2.findContours(image, cv2.RETR_LIST,
+            cv2.CHAIN_APPROX_SIMPLE)
+        self.puzzle_border = max(contours, key=cv2.contourArea)
+        
+        if visualize:
+            image = np.copy(self.image_original)
+            cv2.drawContours(image, [self.puzzle_border], -1, (0,0,255), 3)
+            return image
     
     
     def read_puzzle(self):
