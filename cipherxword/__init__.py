@@ -1,1 +1,1 @@
-from ciphercrossword import *
+from cipherxword.ciphercrossword import CipherCrossword

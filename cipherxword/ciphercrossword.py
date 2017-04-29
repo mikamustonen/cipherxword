@@ -9,7 +9,13 @@ class CipherCrossword(object):
     """
     
     def __init__(self, filename):
-        raise NotImplementedError()
+        
+        # If OpenCV fails to read the image (say, because the path was wrong),
+        # imread returns None.
+        self.image_original = cv2.imread(filename)
+        if self.image_original is None:
+            raise RuntimeError("Unable to read the image file.")
+        self.image_grayscale = cv2.cvtColor(self.image_original, cv2.COLOR_BGR2GRAY)
     
     
     def isolate_puzzle(self, visualize=False):
