@@ -1,0 +1,10 @@
+name: cipherxword
+channels:
+- menpo
+dependencies:
+- python=3.5
+- numpy
+- matplotlib>=2.0
+- scikit-learn
+- scikit-image
+- opencv3
