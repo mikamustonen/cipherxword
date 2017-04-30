@@ -5,7 +5,6 @@ on a pure white background, in the order 0...9 on each row, separated by
 whitespace.
 """
 
-import numpy as np
 import cv2
 
 
