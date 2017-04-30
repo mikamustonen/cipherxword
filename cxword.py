@@ -17,6 +17,8 @@ parser.add_argument("outputfile", nargs=1, type=str,
     help="output file name for the solved puzzle")
 parser.add_argument("--puzzle-border", type=str, default=None,
     help="output file for an image with the detected puzzle border drawn")
+parser.add_argument("--digits", type=str, default=None,
+    help="output file for an image with the detected digits drawn")
 options = parser.parse_args()
 
 # Read and solve the puzzle
@@ -27,6 +29,9 @@ if options.puzzle_border:
 
 print("Reading the puzzle from the image...")
 puzzle = cw.read_puzzle(verbose=True)
+if options.digits:
+    digits_overlaid = cw.overlay(puzzle)
+    cv2.imwrite(options.digits, digits_overlaid)
 
 print("Solving the puzzle using simulated annealing...")
 solution, solved = cw.solve("data/words_finnish.txt", options.outputfile[0])
