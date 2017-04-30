@@ -25,4 +25,10 @@ puzzle_with_border = cw.detect_puzzle(visualize=True)
 if options.puzzle_border:
     cv2.imwrite(options.puzzle_border, puzzle_with_border)
 
-cv2.imwrite(options.outputfile[0], cw.overlay(cw.read_puzzle(verbose=True)))
+puzzle = cw.read_puzzle(verbose=True)
+solution, solved = cw.solve("data/words_finnish.txt", options.outputfile[0])
+
+print("\nThe solution key:")
+print(solution)
+print("\nThe solved puzzle:")
+print(solved)
