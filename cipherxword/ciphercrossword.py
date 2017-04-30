@@ -3,6 +3,7 @@
 import cv2
 import numpy as np
 from cipherxword.digitclassifier import DigitClassifier
+from cipherxword.cryptogramsolver import CryptogramSolver, apply_key
 
 
 class CipherCrossword(object):
@@ -159,6 +160,33 @@ class CipherCrossword(object):
                     words.append(acc)
         
         return words
+    
+    
+    def solve(self, word_file, save_image=None):
+        """Finds a solution for the crossword.
+        
+        Args:
+            word_file:   name of the file containing known words of the language
+            save_image:  name of the file to save the solution overlaid on
+                         top of the original puzzle
+        
+        Returns:
+            solution_key:   a dictionary mapping numbers to the alphabet
+            solved_puzzle:  the solved puzzle in a text form
+        """
+        solver = CryptogramSolver(word_file)
+        solution_key = solver.solve(self.cryptogram())
+        
+        key = {k: v.upper() for k, v in solution_key.items()}
+        key[-1] = " "
+        solution = apply_key(self.puzzle.transpose(), key)
+        solved_puzzle = "\n".join(solution)
+        
+        if save_image:
+            solution = apply_key(self.puzzle, key)
+            cv2.imwrite(save_image, self.overlay(solution))
+        
+        return solution_key, solved_puzzle
     
     
     def _cell_images(self):
