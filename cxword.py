@@ -13,6 +13,8 @@ import cv2
 parser = argparse.ArgumentParser(__doc__)
 parser.add_argument("inputfile", nargs=1, type=str,
     help="the puzzle image file name")
+parser.add_argument("outputfile", nargs=1, type=str,
+    help="output file name for the solved puzzle")
 parser.add_argument("--puzzle-border", type=str, default=None,
     help="output file for an image with the detected puzzle border drawn")
 options = parser.parse_args()
@@ -23,4 +25,4 @@ puzzle_with_border = cw.detect_puzzle(visualize=True)
 if options.puzzle_border:
     cv2.imwrite(options.puzzle_border, puzzle_with_border)
 
-print(cw.read_puzzle(verbose=True))
+cv2.imwrite(options.outputfile[0], cw.overlay(cw.read_puzzle(verbose=True)))

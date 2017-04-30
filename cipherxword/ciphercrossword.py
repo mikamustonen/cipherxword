@@ -65,7 +65,8 @@ class CipherCrossword(object):
                 self.width_in_cells, self.height_in_cells))
         
         # By default, every square is empty or outside the puzzle
-        self.puzzle = -np.ones((self.width_in_cells, self.height_in_cells))
+        self.puzzle = -np.ones((self.width_in_cells, self.height_in_cells),
+            dtype=np.int16)
         
         # An educated guess for filled_threshold: 80% of the maximum brightness
         filled_threshold = 0.8*np.max([np.average(im)
@@ -129,7 +130,7 @@ class CipherCrossword(object):
                     yield ix, iy, square
     
     
-    def overlay(self, values):
+    def overlay(self, values, color=(0,0,255), blank=-1):
         """Overlays an array of strings or integers on top of the original
         image of the puzzle.
         
@@ -140,7 +141,16 @@ class CipherCrossword(object):
         Returns:
             the original image with the overlayed data
         """
-        raise NotImplementedError()
+        image = np.copy(self.image_original)
+        for ix in range(self.width_in_cells):
+            for iy in range(self.height_in_cells):
+                if values[ix][iy] != blank:
+                    loc = (int(self.puzzle_x + (ix + 0.25)*self.puzzle_width/self.width_in_cells),
+                        int(self.puzzle_y + (iy + 0.8)*self.puzzle_height/self.height_in_cells))
+                    cv2.putText(image, str(values[ix][iy]), loc,
+                        cv2.FONT_HERSHEY_COMPLEX, 1, color)
+        
+        return image
 
 
 # Auxiliary functions
