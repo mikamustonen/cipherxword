@@ -82,7 +82,8 @@ class CryptogramSolver(object):
                 print("{:06}  New best solution, score {}".format(iteration, score))
             
             # Metropolis-Hastings criterion for accepting the step
-            prob = exp(-(prev_score - score)/temperature)
+            if score <= prev_score:
+                prob = exp(-(prev_score - score)/temperature)
             if score > prev_score or random.random() < prob:
                 prev_score = score
                 temperature *= 0.9
