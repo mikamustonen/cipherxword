@@ -33,6 +33,13 @@ class CryptogramSolver(object):
         
         Args:
             cryptogram:  a list of encoded words
+            initial_temperature:  starting value for the temperature
+            reheat_trigger:       number of iterations without progress that
+                                  triggers reheating to the initial temperature
+            max_iterations:       number of iterations spent finding the best
+                                  solution
+            cooling_factor:       a multiplier applied to the temperature each
+                                  step to simulate annealing
         
         Returns:
             a dictionary mapping the encoding of the cryptogram to the alphabet

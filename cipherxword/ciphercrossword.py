@@ -50,6 +50,17 @@ class CipherCrossword(object):
         filled_cell_threshold=0.8):
         """Reads the puzzle into an array.
         
+        Args:
+            digit_min_width:        a minimum width for a contour to be
+                                    considered as a digit, in units of cell
+                                    width
+            digit_max_width:        same for maximum width
+            digit_min_height:       same for minimum height
+            digit_max_height:       same for maximum height
+            filled_cell_threshold:  a cell is considered filled, if its average
+                                    darkness is at least this factor times
+                                    the largest average darkness of a cell
+        
         Returns:
             a NumPy array of integers with the number recognized from
             the square for empty cells, and -1 for filled cells.
