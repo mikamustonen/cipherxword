@@ -116,6 +116,10 @@ class CipherCrossword(object):
                 bboxes = [b for i, b in enumerate(bboxes) if ok[i]]
                 bboxes.sort(key=lambda x: -x[0]) # order from right to left
                 
+                if len(bboxes) == 0:
+                    raise RuntimeError("Unable to find a digit in square {}".
+                        format((ix,iy)))
+                
                 # Classify each digit and combine them to a number
                 digit_values = self.digit_classifier.predict([
                     image[y:y+h,x:x+w] for x, y, w, h in bboxes])
@@ -145,7 +149,7 @@ class CipherCrossword(object):
             for value in row:
                 # Keep accumulating values to the list until we encounter
                 # a filled cell
-                if value > 0:
+                if value >= 0:
                     acc.append(value)
                 else:
                     # If we have at least three values accumulated, it's a word
