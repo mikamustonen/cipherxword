@@ -42,7 +42,8 @@ class CipherCrossword(object):
             return image
     
     
-    def read_puzzle(self, verbose=False):
+    def read_puzzle(self, verbose=False, digit_min_width=0.05,
+        digit_max_width=0.4, digit_min_height=0.1, digit_max_height=0.5):
         """Reads the puzzle into an array.
         
         Returns:
@@ -56,15 +57,77 @@ class CipherCrossword(object):
         self.puzzle_area = self.image_thresholded[y : y + h, x : x + w]
         self.width_in_cells = count_cells(np.average(self.puzzle_area, axis=0))
         self.height_in_cells = count_cells(np.average(self.puzzle_area, axis=1))
+        self.puzzle_x, self.puzzle_y = x, y
+        self.puzzle_width, self.puzzle_height = w, h
         
         if verbose:
             print("Detected puzzle dimension: ({}, {})".format(
                 self.width_in_cells, self.height_in_cells))
         
-        # TODO: Detect the filled cells
+        # By default, every square is empty or outside the puzzle
+        self.puzzle = -np.ones((self.width_in_cells, self.height_in_cells))
         
-        # TODO: OCR the digits on the empty cells
+        # An educated guess for filled_threshold: 80% of the maximum brightness
+        filled_threshold = 0.8*np.max([np.average(im)
+            for _, _, im in self._cell_images()])
+        
+        # Read the numbers in the empty squares
+        # First, translate the reasonable digit size to pixels
+        average_square_width = self.puzzle_width/self.width_in_cells
+        average_square_height = self.puzzle_height/self.height_in_cells
+        wmin = digit_min_width*average_square_width
+        wmax = digit_max_width*average_square_width
+        hmin = digit_min_height*average_square_height
+        hmax = digit_max_height*average_square_height
+        
+        for ix, iy, cell_image in self._cell_images():
+            # The cell images are taken from the thresholded image, so they
+            # are negative: filled squares hence appear bright
+            if np.average(cell_image) < filled_threshold:
+                _, contours, _ = cv2.findContours(cell_image, cv2.RETR_LIST,
+                    cv2.CHAIN_APPROX_SIMPLE)
+                # Filter contours that are in a reasonable rage of height and
+                # width
+                digits = []
+                for c in contours:
+                    x, y, w, h = cv2.boundingRect(c)
+                    if wmin <= w <= wmax and hmin <= h <= hmax:
+                        digits.append(c)
+                
+                # For contour which have mostly overlapping bounding boxes,
+                # filter out the smaller ones by height (they must be holes)
+                
+                # Temporarily, return the number of digits found
+                self.puzzle[ix,iy] = len(digits)
+                
+                # TODO: Classify each digit
+                
+                # TODO: Combine the digits to the number
+        
+        return self.puzzle 
 
+    
+    def _cell_images(self):
+        """A generator that yields the cells in the puzzle.
+        
+        Works only after the puzzle dimensions in cells are determined. Meant
+        to be called from read_puzzle.
+        """
+        average_width = float(self.puzzle_width)/self.width_in_cells
+        average_height = float(self.puzzle_height)/self.height_in_cells
+        
+        for ix in range(self.width_in_cells):
+            for iy in range(self.height_in_cells):
+                # The puzzle is not necessarily rectangular, so check that
+                # we are inside the puzzle borders
+                x1, y1 = int(ix*average_width), int(iy*average_height)
+                x2, y2 = int((ix+1)*average_width), int((iy+1)*average_height)
+                midpoint = (self.puzzle_x + int((ix + 0.5)*average_width),
+                    self.puzzle_y + int((iy + 0.5)*average_height))
+                if cv2.pointPolygonTest(self.puzzle_border, midpoint, False) > 0:
+                    square = self.puzzle_area[y1:y2, x1:x2]
+                    yield ix, iy, square
+    
     
     def overlay(self, values):
         """Overlays an array of strings or integers on top of the original

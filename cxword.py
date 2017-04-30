@@ -23,4 +23,4 @@ puzzle_with_border = cw.detect_puzzle(visualize=True)
 if options.puzzle_border:
     cv2.imwrite(options.puzzle_border, puzzle_with_border)
 
-cw.read_puzzle(verbose=True)
+print(cw.read_puzzle(verbose=True))
