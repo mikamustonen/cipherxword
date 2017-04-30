@@ -2,6 +2,7 @@
 
 import cv2
 import numpy as np
+from cipherxword.digitclassifier import DigitClassifier
 
 
 class CipherCrossword(object):
@@ -17,6 +18,7 @@ class CipherCrossword(object):
         if self.image_original is None:
             raise RuntimeError("Unable to read the image file.")
         self.image_grayscale = cv2.cvtColor(self.image_original, cv2.COLOR_BGR2GRAY)
+        self.digit_classifier = DigitClassifier()
     
     
     def detect_puzzle(self, visualize=False):
@@ -85,6 +87,7 @@ class CipherCrossword(object):
             # The cell images are taken from the thresholded image, so they
             # are negative: filled squares hence appear bright
             if np.average(cell_image) < filled_threshold:
+                image = 255 - cell_image # flip the negative
                 _, contours, _ = cv2.findContours(cell_image, cv2.RETR_LIST,
                     cv2.CHAIN_APPROX_SIMPLE)
                 # Filter contours that are in a reasonable rage of height and
@@ -110,13 +113,13 @@ class CipherCrossword(object):
                             h2*w2 < h1*w1): ok[i] = False
                 
                 bboxes = [b for i, b in enumerate(bboxes) if ok[i]]
+                bboxes.sort(key=lambda x: -x[0]) # order from right to left
                 
-                # Temporarily, return the number of digits found
-                self.puzzle[ix,iy] = len(bboxes)
-                
-                # TODO: Classify each digit
-                
-                # TODO: Combine the digits to the number
+                # Classify each digit and combine them to a number
+                digit_values = self.digit_classifier.predict([
+                    image[y:y+h,x:x+w] for x, y, w, h in bboxes])
+                self.puzzle[ix,iy] = sum(d*10**pos
+                    for pos, d in enumerate(digit_values))
         
         return self.puzzle 
 
