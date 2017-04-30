@@ -95,11 +95,24 @@ class CipherCrossword(object):
                     if wmin <= w <= wmax and hmin <= h <= hmax:
                         digits.append(c)
                 
-                # For contour which have mostly overlapping bounding boxes,
-                # filter out the smaller ones by height (they must be holes)
+                # At this point, our set of contours might include ones that
+                # are holes in the numbers, instead of holes; figure out which
+                # ones are likely actual digits by looking at pairwise overlaps
+                # of their bounding boxes
+                bboxes = [cv2.boundingRect(c) for c in digits]
+                ok = [True for c in contours]
+                for x1, y1, w1, h1 in bboxes:
+                    for i, (x2, y2, w2, h2) in enumerate(bboxes):
+                        # If the horizontal overlap of the two bounding boxes
+                        # is more than two pixels, and bounding box 1 is larger,
+                        # mark bounding box 2 for removal
+                        if (max(min(x1 + w1, x2 + w2) - max(x1, x2), 0) > 2 and
+                            h2*w2 < h1*w1): ok[i] = False
+                
+                bboxes = [b for i, b in enumerate(bboxes) if ok[i]]
                 
                 # Temporarily, return the number of digits found
-                self.puzzle[ix,iy] = len(digits)
+                self.puzzle[ix,iy] = len(bboxes)
                 
                 # TODO: Classify each digit
                 
