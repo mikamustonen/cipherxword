@@ -29,6 +29,6 @@ puzzle = cw.read_puzzle(verbose=True)
 solution, solved = cw.solve("data/words_finnish.txt", options.outputfile[0])
 
 print("\nThe solution key:")
-print(solution)
+print(", ".join(["{}: {}".format(k, v.upper()) for k, v in solution.items()]))
 print("\nThe solved puzzle:")
 print(solved)

@@ -38,8 +38,8 @@ class CryptogramSolver(object):
         """
         
         # The initial guess is based on character frequencies in the language
-        numbers_by_frequency = [x for x, _ in Counter([x
-            for word in cryptogram for x in word]).most_common()]
+        clues = Counter([x for word in cryptogram for x in word])
+        numbers_by_frequency = [x for x, _ in clues.most_common()]
         letters_by_frequency = [x for x, _ in self.characters.most_common()]
 
         # Pad the numbers with ones that don't exist in puzzle, so that we
@@ -99,6 +99,9 @@ class CryptogramSolver(object):
                 temperature = initial_temperature
                 key = initial_key
                 prev_score = self.score_proposed_solution(apply_key(cryptogram, key))
+        
+        # Filter out the padding we might have used
+        best_key = {k: v for k, v in best_key.items() if k in clues}
         
         return best_key
         
