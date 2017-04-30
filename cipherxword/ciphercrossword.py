@@ -123,6 +123,43 @@ class CipherCrossword(object):
         
         return self.puzzle 
 
+
+    def _puzzle_rows(self):
+        """Yields each row and column of the puzzle in turn.
+        """
+        for i in range(self.height_in_cells):
+            yield self.puzzle[:, i]
+        for i in range(self.width_in_cells):
+            yield self.puzzle[i, :]
+    
+    
+    def cryptogram(self):
+        """Returns the puzzle as a list of words, where each word is a list
+        of numbers in the empty cells.
+        """
+        
+        words = []
+        for row in self._puzzle_rows():
+            acc = []
+            for value in row:
+                # Keep accumulating values to the list until we encounter
+                # a filled cell
+                if value > 0:
+                    acc.append(value)
+                else:
+                    # If we have at least three values accumulated, it's a word
+                    if len(acc) > 2:
+                        words.append(acc)
+                    # Reset the accumulator, whether we had a word or not
+                    acc = []
+            else:
+                # In the end of the row, also test if we have
+                # accumulated a word
+                if len(acc) > 2:
+                    words.append(acc)
+        
+        return words
+    
     
     def _cell_images(self):
         """A generator that yields the cells in the puzzle.
