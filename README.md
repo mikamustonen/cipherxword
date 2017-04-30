@@ -37,3 +37,7 @@ to be the largest continuous object in the image.
 
 Furthermore, the program is limited to the subtype of cipher crosswords with
 no additional clues, i.e. no letters given and no photo clues.
+
+Because the OpenCV fonts don't support the common Finnish characters Ä and Ö,
+they are mimicked in the overlaid solution by somewhat awkward combinations
+'A' and 'O'.

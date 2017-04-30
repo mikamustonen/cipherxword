@@ -228,8 +228,19 @@ class CipherCrossword(object):
                 if values[ix][iy] != blank:
                     loc = (int(self.puzzle_x + (ix + 0.25)*self.puzzle_width/self.width_in_cells),
                         int(self.puzzle_y + (iy + 0.8)*self.puzzle_height/self.height_in_cells))
-                    cv2.putText(image, str(values[ix][iy]), loc,
-                        cv2.FONT_HERSHEY_COMPLEX, 1, color)
+                    
+                    # The fonts in OpenCV don't have the common Finnish letters
+                    # Ä and Ö. We have to insert umlaut to mimic the look.
+                    st = str(values[ix][iy])
+                    if st == 'Ä':
+                        cv2.putText(image, "'A'", loc, cv2.FONT_HERSHEY_COMPLEX,
+                            1, color)
+                    elif st == 'Ö':
+                        cv2.putText(image, "'O'", loc, cv2.FONT_HERSHEY_COMPLEX,
+                            1, color)
+                    else:
+                        cv2.putText(image, st, loc, cv2.FONT_HERSHEY_COMPLEX, 1,
+                            color)
         
         return image
 
