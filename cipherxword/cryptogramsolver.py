@@ -27,7 +27,8 @@ class CryptogramSolver(object):
         self.trigram_const = 1.0/self.trigrams.most_common(1)[0][1]
     
     
-    def solve(self, cryptogram):
+    def solve(self, cryptogram, initial_temperature=100.0, reheat_trigger=2000,
+        max_iterations=100000, cooling_factor=0.9):
         """Solve a given cryptogram using simulated annealing.
         
         Args:
@@ -57,11 +58,9 @@ class CryptogramSolver(object):
         
         # Initialize the simulated annealing
         trial = apply_key(cryptogram, key)
-        initial_temperature = 100.0
-        reheat_trigger = 2000
         no_progress_steps = 0
         temperature = initial_temperature
-        max_iterations = 100000
+        
         best_score = self.score_proposed_solution(trial)
         prev_score = best_score
         best_key = key.copy()
@@ -86,7 +85,7 @@ class CryptogramSolver(object):
                 prob = exp(-(prev_score - score)/temperature)
             if score > prev_score or random.random() < prob:
                 prev_score = score
-                temperature *= 0.9
+                temperature *= cooling_factor
             else:
                 # swap back
                 key[x], key[y] = key[y], key[x]

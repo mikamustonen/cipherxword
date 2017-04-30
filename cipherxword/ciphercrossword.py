@@ -46,7 +46,8 @@ class CipherCrossword(object):
     
     
     def read_puzzle(self, verbose=False, digit_min_width=0.05,
-        digit_max_width=0.4, digit_min_height=0.1, digit_max_height=0.5):
+        digit_max_width=0.4, digit_min_height=0.1, digit_max_height=0.5,
+        filled_cell_threshold=0.8):
         """Reads the puzzle into an array.
         
         Returns:
@@ -72,7 +73,7 @@ class CipherCrossword(object):
             dtype=np.int16)
         
         # An educated guess for filled_threshold: 80% of the maximum brightness
-        filled_threshold = 0.8*np.max([np.average(im)
+        filled_threshold = filled_cell_threshold*np.max([np.average(im)
             for _, _, im in self._cell_images()])
         
         # Read the numbers in the empty squares
